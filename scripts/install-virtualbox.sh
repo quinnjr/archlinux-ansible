@@ -10,5 +10,3 @@ echo '===> Enabling virtualbox services'
 
 echo '===> Adding vagrant user to vboxsf group'
 /usr/bin/gpasswd -a vagrant vboxsf
-
-exit 0

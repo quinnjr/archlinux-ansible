@@ -7,5 +7,3 @@ set -eu
 /usr/bin/pacman-optimize
 
 /usr/bin/sync
-
-exit 0

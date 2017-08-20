@@ -11,7 +11,7 @@ COUNTRY=${COUNTRY:-US}
 MIRRORLIST="https://www.archlinux.org/mirrorlist/?country=${COUNTRY}&protocol=https&ip_version=4&use_mirror_status=on"
 
 echo '===> Creating local pacman proxy'
-echo 'Server = http://10.0.2.2:8899/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
+echo 'Server = http://10.0.2.2:9990/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
 
 # echo '===> Updating pacman mirrorlist'
 # curl -s "$MIRRORLIST" | sed 's/^#Server/Server/' > /etc/pacman.d/mirrorlist
@@ -61,5 +61,3 @@ echo '===> Installing poweroff.timer'
 echo '===> Preparing to reboot'
 /usr/bin/umount -R ${MNTDIR}
 /usr/bin/systemctl reboot
-
-exit 0
