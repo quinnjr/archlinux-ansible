@@ -6,7 +6,7 @@
 		"ssh_timeout": "20m",
 		"country": "US",
 		"headless": "true",
-    "version": "0.0.1",
+    "version": "2017.07.01",
     "cloud_token": "{{ env `VAGRANT_CLOUD_TOKEN` }}"
 	},
 	"builders": [
@@ -78,8 +78,9 @@
     [{
 				"type": "vagrant",
 				"compression_level": 9,
-				"output": "output/archlinux-ansible_{{ .Provider }}-{{timestamp}}.box",
-        "vagrantfile_template": "files/Vagrantfile"
+				"output": "output/archlinux-ansible_{{ .Provider }}-{{user `version`}}.box",
+        "vagrantfile_template": "files/Vagrantfile",
+        "keep_input_artifact": true
 		},
     {
       "type": "vagrant-cloud",

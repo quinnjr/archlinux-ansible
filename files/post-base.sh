@@ -27,11 +27,6 @@ echo KEYMAP=${KEYMAP} > /etc/vconsole.conf
 /usr/bin/systemctl enable sshd
 /usr/bin/sed -i 's/#UseDNS yes/UseDNS no/' /etc/ssh/sshd_config
 
-echo '===> Generate an up-to-date mirrorlist'
-/usr/bin/curl --progress-bar -o /etc/pacman.d/mirrorlist https://www.archlinux.org/mirrorlist/?country=US&protocol=https&ip_version=4&ip_version=6&use_mirror_status=on
-
-/usr/bin/sed -i -e 's/#Server/Server/' /etc/pacman.d/mirrorlist
-
 /usr/bin/useradd --password ${PASSWD} --comment 'Vagrant User' --create-home --user-group vagrant
 echo 'Defaults env_keep += "SSH_AUTH_SOCK"' > /etc/sudoers.d/10-vagrant
 echo 'vagrant ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers.d/10-vagrant

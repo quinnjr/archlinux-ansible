@@ -13,9 +13,6 @@ MIRRORLIST="https://www.archlinux.org/mirrorlist/?country=${COUNTRY}&protocol=ht
 echo '===> Creating local pacman proxy'
 echo 'Server = http://10.0.2.2:9990/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
 
-# echo '===> Updating pacman mirrorlist'
-# curl -s "$MIRRORLIST" | sed 's/^#Server/Server/' > /etc/pacman.d/mirrorlist
-
 echo "===> Zapping ${DISK}"
 /usr/bin/sgdisk --zap ${DISK}
 
@@ -45,7 +42,7 @@ echo '===> Mounting boot partition'
 /usr/bin/mount -o noatime,errors=remount-ro ${BOOTPART} "${MNTDIR}/boot"
 
 echo '===> Installing base and base-devel groups'
-/usr/bin/pacstrap ${MNTDIR} base base-devel openssh grub ansible python python2 python-ansible
+/usr/bin/pacstrap -M ${MNTDIR} base base-devel openssh grub ansible python python2 python-ansible
 
 echo '===> Generating fstab'
 /usr/bin/genfstab -p ${MNTDIR} >> "${MNTDIR}/etc/fstab"
@@ -54,6 +51,12 @@ echo '===> Configuring the base system'
 install -Dm0755 /root/post-base.sh ${MNTDIR}/usr/local/bin/post-base.sh
 
 /usr/bin/arch-chroot ${MNTDIR} /usr/local/bin/post-base.sh
+
+echo '===> Generating mirrorlist'
+mv /mnt/etc/pacman.d/mirrorlist /mnt/etc/pacman.d/mirrorlist.bak
+curl -o mirrorlist -O 'https://www.archlinux.org/mirrorlist/?country=US&protocol=https&ip_version=4&ip_version=6&use_mirror_status=on'
+mv mirrorlist /mnt/etc/pacman.d/mirrorlist
+sed -i -e 's/#Server/Server/' /mnt/etc/pacman.d/mirrorlist
 
 echo '===> Installing poweroff.timer'
 /usr/bin/install -Dm644 /root/poweroff.timer "${MNTDIR}/etc/systemd/system/poweroff.timer"
