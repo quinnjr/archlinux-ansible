@@ -1,6 +1,4 @@
-#!/bin/bash
-
-set -e
+#!/bin/bash -e
 
 sudo pacman -S --noconfirm virtualbox-guest-utils-nox virtualbox-guest-modules-arch
 sudo systemctl enable vboxservice

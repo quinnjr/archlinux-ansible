@@ -1,33 +1,36 @@
 {
   "variables": {
-    "iso_url": "http://mirror.rackspace.com/archlinux/iso/latest/archlinux-{{isotime \"2006.01\"}}.02-x86_64.iso",
+    "iso_url": "http://mirror.rackspace.com/archlinux/iso/latest/archlinux-{{isotime \"2006.01\"}}.01-x86_64.iso",
     "iso_checksum_url": "http://mirror.rackspace.com/archlinux/iso/latest/sha1sums.txt",
     "iso_checksum_type": "sha1",
     "disk_size": "20480",
     "memory": "1024",
     "cpus": "2",
-    "vagrant_cloud_token": "{{ vault `/data/data/tokens` `atlus_token` }}",
     "write_zeroes": "",
-    "boot_wait": "45s"
+    "boot_wait": "120s"
   },
   "sensitive-variables": ["vagrant_cloud_token"],
   "builders": [
     {
       "type": "virtualbox-iso",
       "boot_wait": "{{user `boot_wait`}}",
-      "http_directory": "http",
       "disk_size": "{{user `disk_size`}}",
+      "guest_additions_mode": "disable",
       "guest_os_type": "ArchLinux_64",
-      "iso_checksum_url": "{{user `iso_checksum_url`}}",
+      "headless": true,
+      "http_directory": "http",
       "iso_checksum_type": "{{user `iso_checksum_type`}}",
+      "iso_checksum_url": "{{user `iso_checksum_url`}}",
       "iso_url": "{{user `iso_url`}}",
-      "ssh_username": "vagrant",
+      "post_shutdown_delay": "120s",
+      "shutdown_command": "systemctl poweroff",
       "ssh_password": "vagrant",
       "ssh_port": 22,
+      "ssh_username": "vagrant",
       "ssh_wait_timeout": "10000s",
-      "shutdown_command": "sudo systemctl poweroff",
-      "guest_additions_mode": "disable",
-      "headless": true,
+      "vrdp_bind_address": "127.0.0.1",
+      "vrdp_port_min": 11000,
+      "vrdp_port_max": 12000,
       "vboxmanage": [
         [
           "modifyvm",
@@ -43,25 +46,27 @@
         ]
       ],
       "boot_command": [
-        "<enter><wait10><wait10><wait10><wait10><wait10><enter>",
-        "curl -O 'http://{{.HTTPIP}}:{{.HTTPPort}}/install{,-chroot}.sh'<enter><wait>",
-        "bash ./install.sh < ./install-chroot.sh && systemctl reboot<enter>"
+        "<tab><spacebar>",
+        "net.ifnames=0 biosdevname=0",
+        "<enter><wait10><wait10><wait10><wait10><wait10><wait10>",
+        "/usr/bin/curl -O 'http://{{.HTTPIP}}:{{.HTTPPort}}/install{,-chroot}.sh'<enter><wait5>",
+        "/usr/bin/bash ./install.sh < ./install-chroot.sh && systemctl reboot<enter>"
       ]
     },
     {
       "type": "qemu",
       "boot_wait": "{{user `boot_wait`}}",
-      "http_directory": "http",
       "disk_size": "{{user `disk_size`}}",
-      "iso_checksum_url": "{{user `iso_checksum_url`}}",
+      "headless": true,
+      "http_directory": "http",
       "iso_checksum_type": "{{user `iso_checksum_type`}}",
+      "iso_checksum_url": "{{user `iso_checksum_url`}}",
       "iso_url": "{{user `iso_url`}}",
-      "ssh_username": "vagrant",
+      "shutdown_command": "sudo systemctl poweroff",
       "ssh_password": "vagrant",
       "ssh_port": 22,
+      "ssh_username": "vagrant",
       "ssh_wait_timeout": "10000s",
-      "shutdown_command": "sudo systemctl poweroff",
-      "headless": true,
       "qemuargs": [
         [
           "-m",
@@ -73,8 +78,8 @@
         ]
       ],
       "boot_command": [
-        "<enter><wait10><wait10><wait10><wait10><wait10>",
-        "curl -O 'http://{{.HTTPIP}}:{{.HTTPPort}}/install{,-chroot}.sh'<enter><wait>",
+        "<enter><wait10><wait10><wait10><wait10><wait10><wait10>",
+        "curl -O 'http://{{.HTTPIP}}:{{.HTTPPort}}/install{,-chroot}.sh'<enter><wait5>",
         "bash ./install.sh < ./install-chroot.sh && systemctl reboot<enter>"
       ]
     }
@@ -85,15 +90,15 @@
       "scripts": [
         "scripts/virtualbox.sh"
       ],
-      "execute_command": "echo 'vagrant'|sudo -S sh '{{.Path}}'",
+      "execute_command": "echo 'vagrant' | sudo -S sh '{{.Path}}'",
       "only": ["virtualbox-iso"]
     },
     {
       "type": "shell",
       "scripts": [
-      "scripts/qemu.sh"
-    ],
-      "execute_command": "echo 'vagrant'|sudo -S sh '{{.Path}}'",
+        "scripts/qemu.sh"
+      ],
+      "execute_command": "echo 'vagrant' | sudo -S sh '{{.Path}}'",
       "only": ["qemu"]
     }
   ],
@@ -106,14 +111,7 @@
       },
       {
         "type": "vagrant-cloud",
-        "only": ["virtualbox-iso"],
-        "access_token": "{{user `vagrant_cloud_token`}}",
-        "box_tag": "quinnjr/archlinux-ansible",
-        "version": "{{isotime \"2006.01.02\"}}"
-      },
-      {
-        "type": "vagrant-cloud",
-        "only": ["qemu"],
+        "only": ["virtualbox-iso", "qemu"],
         "access_token": "{{user `vagrant_cloud_token`}}",
         "box_tag": "quinnjr/archlinux-ansible",
         "version": "{{isotime \"2006.01.02\"}}"
